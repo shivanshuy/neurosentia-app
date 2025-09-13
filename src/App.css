@@ -1,0 +1,374 @@
+#root {
+  /* max-width: 1280px; */
+  /* text-align: center; */
+  width: 100%;
+}
+
+.app-container-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+@media (max-width: 768px) {
+
+  .app-container {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 51px)
+  }
+
+  .app-bar-top {
+    display: block;
+    border-bottom: 1px solid #454041;
+  }
+
+  .app-menu-left-drawer {
+    display: block;
+  }
+
+
+  .app-menu-left-home {
+    display: none;
+  }
+
+  .app-menu-left {
+    display: none;
+  }
+
+  .app-content-home-left-image {
+    display: flex;
+    flex: 1.5;
+    height: 100%;
+    margin-left: -20px;
+  }
+
+  .app-content-home-left-banner-small {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .app-content-home-left-banner {
+    display: none;
+  }
+
+  .app-content-home-right {
+    display: none;
+  }
+
+
+  .app-content-page {
+    display: flex;
+    flex-direction: column;
+    background-color: #1d1d1d;
+    height: 100%;
+    padding-left: 20px;
+    width: calc(100% - 20px);
+  }
+
+  .app-content-services {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #1d1d1d;
+    border-top: 1px solid #454041;
+    margin-top: 5px;
+  }
+
+  .app-content-contact {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #1d1d1d;
+    border-top: 1px solid #454041
+  }
+
+
+  .app-content-contact-pic {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+    width: 50%;
+    margin-top: 20px;
+    margin-right: 45px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .app-content-contact-left-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+  }
+
+  .app-content-contact-right-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+  }
+
+  .app-menu-left {
+    display: none;
+  }
+
+  .app-menu-right {
+    display: none;
+  }
+
+
+  .chat-bot-pre-ai-messsage-small {
+    display: flex;
+    flex-direction: column;
+    flex: 8;
+    margin-top: 10px;
+  }
+
+  .chat-bot-pre-ai-messsage-big {
+    display: none;
+  }
+
+  .chat-bot-content-history {
+    display: none;
+  }
+
+}
+
+
+@media (min-width: 769px) {
+
+  .app-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+  }
+
+  .app-bar-top {
+    display: none;
+  }
+
+  .app-menu-left-drawer {
+    display: none;
+  }
+
+  .app-menu-left-home {
+    display: block;
+  }
+
+  .app-content-home-left-image {
+    display: none;
+  }
+
+  .app-content-home-left-banner-small {
+    display: none;
+  }
+
+  .app-content-home-left-banner {
+    display: block;
+  }
+
+  .app-content-home-right {
+    display: flex;
+    flex: 7;
+    height: 100%;
+  }
+
+  .app-content-contact-pic {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    width: 70%;
+    margin-top: 45px;
+    margin-right: 45px;
+    margin-bottom: 45px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .app-content-page {
+    display: flex;
+    flex-direction: column;
+    flex: 9.5;
+    background-color: #1d1d1d;
+    height: 100%;
+    margin-left: 320px;
+    padding-left: 30px;
+    width: calc(100% - 350px);
+  }
+
+  .app-content-services {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #1d1d1d;
+    border-top: 1px solid #454041;
+    margin-top: 5px;
+  }
+
+  .app-content-contact-left-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+  }
+
+  .app-content-contact-right-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+  }
+
+  .app-content-contact {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    background-color: #1d1d1d;
+    border-top: 1px solid #454041
+  }
+
+  .app-menu-right {
+    display: flex;
+    flex-direction: column;
+    min-width: 253px;
+    border-right: 1px solid #454041;
+    padding-left: 10px;
+  }
+
+  .app-menu-left {
+    display: flex;
+    flex-direction: column;
+    box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
+  }
+
+  .chat-bot-pre-ai-messsage-big {
+    display: flex;
+    flex-direction: column;
+    flex: 8;
+  }
+
+  .chat-bot-pre-ai-messsage-small {
+    display: none;
+  }
+
+  .chat-bot-content-history {
+    display: flex;
+    flex: 2;
+  }
+}
+
+
+.app-menu {
+  display: flex;
+  flex-direction: row;
+  flex: 2.5;
+  background-color: #1d1d1d;
+  position: fixed;
+  top: 0;
+  height: 100vh;
+}
+
+.app-content-home {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.app-content-home-left {
+  display: flex;
+  flex: 5;
+  height: 100%;
+}
+
+.app-content-home-left-content {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.app-content-services-left-content {
+  display: flex;
+  flex: 8;
+  height: 100%;
+}
+
+.app-content-services-right-content {
+  display: flex;
+  flex-direction: column;
+  flex: 6;
+  height: 100%;
+}
+
+.app-content-blog-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.app-content-blog-item {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-content-blog-item-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.app-content-blog-item-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+.chat-bot-content {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.chat-bot-content-main {
+  display: flex;
+  flex: 6;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-bot-pre-messsage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 7;
+  width: 100%;
+  margin-top: -25px;
+  margin-bottom: -25px;
+}
+
+.chat-bot-pre-messsage-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.chat-bot-user-messsage {
+  display: flex;
+  flex: 2;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input.Mui-disabled {
+  -webkit-text-fill-color: white !important;
+  color: white !important;
+  font-family: 'monospace' !important;
+}
