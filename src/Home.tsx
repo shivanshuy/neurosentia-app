@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import BlogHighlights from './components/BlogHighlights';
+import HomeFooter from './components/HomeFooter';
 import logoIcon from './assets/logo-icon.png';
 import logoText from './assets/logo-text.png';
 
@@ -62,15 +63,17 @@ function HomeBrandRow({ iconWidth, wordmarkHeight, marginLeft }: HomeBrandRowPro
 
 function Home() {
   return (
-    <Box className='app-content-page' sx={{ height: '300%' }}>
+    <Box className='app-content-page'>
       <Box className='app-content-home'>
         <Box className='app-content-home-left'>
           <Box className='app-content-home-left-content'>
-            <Box sx={{
-              backgroundImage: 'url("hero1.jpg")', // Replace with your image path
-              backgroundSize: 'cover', // Adjust as needed (contain, 100% 100%, etc.)
-              backgroundRepeat: 'no-repeat',
-            }} className='app-content-home-left-image'>
+            <Box
+              sx={{
+                backgroundImage: 'url("hero1.jpg")',
+                backgroundRepeat: 'no-repeat',
+              }}
+              className='app-content-home-left-image'
+            >
             </Box>
             <Box className='app-content-home-left-banner-small' sx={{ pr: 3 }}>
               <HomeBrandRow iconWidth="72px" wordmarkHeight="28px" marginLeft={-0.25} />
@@ -102,42 +105,31 @@ function Home() {
         }} className='app-content-home-right'>
         </Box>
       </Box>
-      <Box className='app-content-services'>
+      <Box className='app-content-section app-content-provide-services'>
+        <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
+          Services we provide
+        </Typography>
+        <Typography sx={{ mt: 2, color: '#d2d2d2', fontSize: '1.5em' }}>
+          AI development, software engineering, and technical consulting at the intersection of intelligence and craft.
+        </Typography>
+      </Box>
+      <Box className='app-content-section app-content-explore'>
         <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
           Explore and Learn
         </Typography>
         <BlogHighlights></BlogHighlights>
       </Box>
-      <Box className='app-content-contact'>
-        <Box className='app-content-contact-left-content'>
-          <Box sx={{
-            backgroundImage: 'url("prof1.png")', // Replace with your image path
-            backgroundSize: 'cover', // Adjust as needed (contain, 100% 100%, etc.)
-            backgroundRepeat: 'no-repeat',
-          }} className='app-content-contact-pic'>
-          </Box>
-        </Box>
-        <Box className='app-content-contact-right-content'>
-          <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
-            Get in touch
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-            <Typography sx={{ mt: 2, color: '#f9f0ff', fontSize: '1.5em', fontWeight: 'bold' }}>
-              Email -
-            </Typography>
-            <Typography sx={{ ml: 1, mt: 2, pr: 7, color: '#b1b1b1', fontSize: '1.5em' }}>
-              grafikaly@example.com
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-            <Typography sx={{ mt: 2, color: '#f9f0ff', fontSize: '1.5em', fontWeight: 'bold' }}>
-              Facebook -
-            </Typography>
-            <Typography sx={{ ml: 1, mt: 2, pr: 7, color: '#b1b1b1', fontSize: '1.5em' }}>
-              grafikaly@example.com
-            </Typography>
-          </Box>
-        </Box>
+      <Box id="about" className='app-content-section app-content-about'>
+        <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
+          About the company
+        </Typography>
+        <Typography sx={{ mt: 2, color: '#d2d2d2', fontSize: '1.5em' }}>
+          Neurosentia is a space where algorithms think, stories breathe, and art inspires — building software at the
+          crossroads of AI, code, art, and ideas.
+        </Typography>
+      </Box>
+      <Box component="footer" className='app-content-section app-content-contact'>
+        <HomeFooter />
       </Box>
     </Box>
   )
