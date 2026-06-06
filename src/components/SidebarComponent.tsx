@@ -31,7 +31,7 @@ const SidebarComponent = () => {
 
     <div className='app-menu'>
       <Box className='app-menu-left'>
-        <Box className='app-menu-left-home' sx={{ mt: 2, paddingLeft: '8px', paddingRight: '8px'}}>
+        <Box className='app-menu-left-home' sx={{ mt: 2, paddingLeft: '8px', paddingRight: '8px' }}>
           <IconButton component={Link} to={"/"}>
             <CottageOutlinedIcon style={{ color: '#f9f0ff' }} />
           </IconButton>
@@ -54,7 +54,18 @@ const SidebarComponent = () => {
       </Box>
 
       <Box className='app-menu-right'>
-        <Box sx={{ mt: 7, color: '#f9f0ff' }}>
+        <Box sx={{ mt: 1.25, color: '#f9f0ff', height: 40, display: 'flex', alignItems: 'flex-end' }}>
+          <ListItem disablePadding sx={{ width: '100%' }}>
+            <ListItemButton component={Link} to="/" sx={{ py: 0, minHeight: 'unset', alignItems: 'flex-end' }}>
+              <ListItemText sx={{ my: 0 }}>
+                <Typography sx={{ color: '#f9f0ff', fontSize: '1.5em', fontWeight: 'bold', lineHeight: 1 }}>
+                  Back to Home
+                </Typography>
+              </ListItemText>
+            </ListItemButton>
+          </ListItem>
+        </Box>
+        <Box sx={{ mt: 1, color: '#f9f0ff' }}>
           <List>
             {pages.map((item) => (
               <ListItem key={item.text} disablePadding>
