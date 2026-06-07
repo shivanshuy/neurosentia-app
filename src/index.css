@@ -10,6 +10,10 @@
   --ns-on-accent: #1d1d1d;
   --ns-accent-muted: rgba(212, 175, 55, 0.12);
   --ns-hover-bg: rgba(249, 240, 255, 0.05);
+  --ns-scrollbar-size: 10px;
+  --ns-scrollbar-track: color-mix(in srgb, var(--ns-bg-paper) 65%, var(--ns-bg));
+  --ns-scrollbar-thumb: var(--ns-accent);
+  --ns-scrollbar-thumb-hover: color-mix(in srgb, var(--ns-accent) 72%, white);
   --ns-font-sans: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
   --ns-font-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
   --ns-font-mono: 'Fira Code', 'JetBrains Mono', monospace;
@@ -36,7 +40,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   :root {
     --ns-footer-logo: var(--ns-text-lg);
     --ns-footer-nav: var(--ns-text-sm);
@@ -52,4 +56,56 @@ body {
   font-family: var(--ns-font-sans);
   font-size: var(--ns-text-base);
   background-color: var(--ns-bg);
+}
+
+html,
+.app-content-page {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ns-scrollbar-thumb) var(--ns-scrollbar-track);
+}
+
+html::-webkit-scrollbar,
+.app-content-page::-webkit-scrollbar {
+  width: var(--ns-scrollbar-size);
+  height: var(--ns-scrollbar-size);
+}
+
+html::-webkit-scrollbar-track,
+.app-content-page::-webkit-scrollbar-track {
+  background: linear-gradient(
+    180deg,
+    var(--ns-scrollbar-track) 0%,
+    color-mix(in srgb, var(--ns-bg) 88%, var(--ns-scrollbar-track)) 100%
+  );
+  border-left: 1px solid color-mix(in srgb, var(--ns-border) 70%, transparent);
+}
+
+html::-webkit-scrollbar-thumb,
+.app-content-page::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid var(--ns-scrollbar-track);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ns-accent) 88%, white) 0%,
+    var(--ns-accent) 42%,
+    var(--ns-footer) 100%
+  );
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--ns-accent) 35%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+.app-content-page::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    var(--ns-scrollbar-thumb-hover) 0%,
+    var(--ns-accent) 45%,
+    color-mix(in srgb, var(--ns-footer) 82%, white) 100%
+  );
+}
+
+html::-webkit-scrollbar-corner,
+.app-content-page::-webkit-scrollbar-corner {
+  background: var(--ns-scrollbar-track);
 }
