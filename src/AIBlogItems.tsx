@@ -4,65 +4,83 @@ import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { useNavigate } from "react-router";
+import { useNavigate } from 'react-router';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import SectionHeading from './components/SectionHeading';
+import TopicIcon from './components/TopicIcon';
 
+type BlogItem = {
+  moreLink: string;
+  header: string;
+  text: string;
+  icon: React.ReactNode;
+};
 
-const blogList = [
-    {
-        moreLink: '/ai-agents',
-        header: 'AI Agents',
-        text: 'AI Agents be described as a system that can use a LLM to reason through a problem, create a plan to solve the problem, and execute the plan.'
-    },
-    {
-        moreLink: '/react-agent-langgraph',
-        header: 'React Agent with LangGraph',
-        text: 'Code Example of a ReAct Agent using LangGraph and Ollama\'s Mistral model.',
-    }
-]
+const blogList: BlogItem[] = [
+  {
+    moreLink: '/ai-agents',
+    header: 'AI Agents',
+    text: 'AI Agents can be described as a system that uses an LLM to reason through a problem, create a plan, and execute it.',
+    icon: <MenuBookOutlinedIcon />,
+  },
+  {
+    moreLink: '/react-agent-langgraph',
+    header: 'React Agent with LangGraph',
+    text: "Code example of a ReAct Agent using LangGraph and Ollama's Mistral model.",
+    icon: <ArticleOutlinedIcon />,
+  },
+];
 
-function BlogHighlight(blogItem: any) {
-    let navigate = useNavigate();
-    return (
-        <React.Fragment>
-            <ListItem alignItems="flex-start" onClick={() => navigate(blogItem.moreLink)}>
-                <ListItemAvatar sx={{ marginTop: '8px' }}>
-                    <Avatar alt="Remy Sharp" src="blog-item2.png" />
-                </ListItemAvatar>
-                <ListItemText
-                    primary={<Typography gutterBottom sx={{ color: '#f9f0ff', fontSize: '1.8em' }} component="div">{blogItem.header}</Typography>}
-                    secondary={
-                        <React.Fragment>
-                            <Typography gutterBottom sx={{ color: '#b1b1b1', fontSize: '1em' }} component="div">{blogItem.text}</Typography>
-                        </React.Fragment>
-                    }
-                />
-            </ListItem>
-            <Divider variant="inset" component="li" sx={{ borderColor: '#454041', marginRight: '20px' }} />
-        </React.Fragment>
-    )
+function BlogHighlight({ header, text, moreLink, icon }: BlogItem) {
+  const navigate = useNavigate();
+  return (
+    <React.Fragment>
+      <ListItem
+        alignItems="flex-start"
+        onClick={() => navigate(moreLink)}
+        sx={{
+          py: 2,
+          borderRadius: 1,
+          cursor: 'pointer',
+          transition: 'background-color 0.2s ease',
+          '&:hover': { backgroundColor: 'var(--ns-hover-bg)' },
+        }}
+      >
+        <ListItemAvatar sx={{ mt: 0.5, minWidth: 58 }}>
+          <TopicIcon>{icon}</TopicIcon>
+        </ListItemAvatar>
+        <ListItemText
+          primary={
+            <Typography variant="h4" color="text.primary">
+              {header}
+            </Typography>
+          }
+          secondary={
+            <Typography variant="body2" sx={{ mt: 0.5, color: 'text.disabled' }}>
+              {text}
+            </Typography>
+          }
+        />
+      </ListItem>
+      <Divider variant="inset" component="li" sx={{ borderColor: 'divider', mr: 2.5 }} />
+    </React.Fragment>
+  );
 }
 
-
-
 export default function AIBlogItems() {
-
-    const blogItems: any[] = []
-
-    blogList.forEach(item => {
-        blogItems.push(BlogHighlight(item))
-    });
-
-    return (
-        <Box className='app-content-page' sx={{ height: '100%', backgroundColor: '#1d1d1d' }}>
-            <Typography sx={{ mt: '15px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
-                About AI
-            </Typography>
-            <List sx={{ mt: '20px', width: '100%', bgcolor: '#1d1d1d', color: '#f9f0ff' }}>
-                {blogItems}
-            </List>
-        </Box>
-    );
+  return (
+    <Box className="app-content-page" sx={{ height: '100%', backgroundColor: 'background.default' }}>
+      <Box className="home-section-inner" sx={{ px: { xs: 0, md: 0 } }}>
+        <SectionHeading>About AI</SectionHeading>
+        <List sx={{ mt: 2, width: '100%', bgcolor: 'transparent', color: 'text.primary', p: 0 }}>
+          {blogList.map((item) => (
+            <BlogHighlight key={item.header} {...item} />
+          ))}
+        </List>
+      </Box>
+    </Box>
+  );
 }

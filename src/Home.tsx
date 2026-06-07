@@ -1,6 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import BlogHighlights from './components/BlogHighlights';
 import HomeFooter from './components/HomeFooter';
+import ProofShowcase from './components/ProofShowcase';
+import SectionHeading from './components/SectionHeading';
+import ServicesOfferings from './components/ServicesOfferings';
+import { useSettings } from './SettingsProvider';
 import logoIcon from './assets/logo-icon.png';
 import logoText from './assets/logo-text.png';
 
@@ -12,23 +16,85 @@ type HomeBrandRowProps = {
 
 function HomeDeepThoughtSection() {
   return (
-    <>
-      <Typography sx={{ pt: 5, color: '#f9f0ff', fontSize: '1.5em', fontWeight: 'bold', fontStyle: 'italic' }}>
+    <Box
+      sx={{
+        mt: 4,
+        pl: 2.5,
+        borderLeft: '2px solid',
+        borderColor: 'primary.main',
+      }}
+    >
+      <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
+        Like Deep Thought, modern AI can compute remarkable answers — but only when the question is clear.
+        We help you find the right problem, then build the software and intelligence to solve it.
+      </Typography>
+      <Typography
+        variant="subtitle1"
+        sx={{ pt: 2.5, color: 'text.primary', fontStyle: 'italic', fontWeight: 500 }}
+      >
         In search of The Ultimate Question
       </Typography>
-      <Typography sx={{ pt: 2, color: '#d2d2d2', fontSize: '1.2em', fontStyle: 'italic' }}>
+      <Typography variant="body2" sx={{ pt: 2, color: 'text.secondary', fontStyle: 'italic' }}>
         A race of hyper-intelligent, pan-dimensional beings build a supercomputer named Deep Thought to calculate the
         &quot;Answer to the Ultimate Question of Life, the Universe, and Everything.&quot;
       </Typography>
-      <Typography sx={{ pt: 1.5, color: '#d2d2d2', fontSize: '1.2em', fontStyle: 'italic' }}>
+      <Typography variant="body2" sx={{ pt: 1.5, color: 'text.secondary', fontStyle: 'italic' }}>
         After 7.5 million years of processing, the computer reveals the answer is 42.
       </Typography>
-      <Typography sx={{ pt: 1.5, color: '#d2d2d2', fontSize: '1.2em', fontStyle: 'italic' }}>
+      <Typography variant="body2" sx={{ pt: 1.5, color: 'text.secondary', fontStyle: 'italic' }}>
         The beings are completely bewildered by the answer because they do not know what the actual Ultimate Question is.
       </Typography>
-      <Typography sx={{ pt: 2, color: '#b1b1b1', fontSize: '1.25em', fontStyle: 'italic' }}>
-        Douglas Adams
+      <Typography
+        variant="caption"
+        sx={{
+          pt: 2,
+          display: 'block',
+          color: 'text.disabled',
+          fontFamily: 'var(--ns-font-mono)',
+          fontStyle: 'italic',
+        }}
+      >
+        — Douglas Adams
       </Typography>
+    </Box>
+  );
+}
+
+function HomeThemeNote() {
+  const { openSettings } = useSettings();
+
+  return (
+    <Box className="home-theme-note" sx={{ mt: 3 }}>
+      <Typography variant="body2" sx={{ color: 'text.disabled', lineHeight: 1.6 }}>
+        This site is a small proof of craft — open{' '}
+        <button type="button" className="home-theme-note-link" onClick={openSettings}>
+          Settings
+        </button>{' '}
+        to switch fonts and color themes. We build polished software, not generic templates.
+      </Typography>
+    </Box>
+  );
+}
+
+function HomeHeroIntro({ subtitlePt = 3 }: { subtitlePt?: number }) {
+  return (
+    <>
+      <Typography variant="subtitle1" sx={{ pt: subtitlePt, color: 'text.secondary' }}>
+        A space where algorithms think, stories breathe, and art inspires.
+      </Typography>
+      <Typography
+        variant="body1"
+        className="home-section-intro"
+        sx={{ pt: 2, color: 'text.primary', fontWeight: 600, lineHeight: 1.65, width: '100%', maxWidth: 'none' }}
+      >
+        We build fast websites and embed AI — chatbots, agents, and RAG — for teams who want builders and thinkers,
+        not another &quot;transform your business&quot; pitch.
+      </Typography>
+      <Typography variant="body2" sx={{ pt: 1.5, color: 'text.secondary', lineHeight: 1.65 }}>
+        We solve real-world challenges with recent advances in AI: large language models, agentic workflows,
+        retrieval-augmented systems, and scalable web applications built for production.
+      </Typography>
+      <HomeDeepThoughtSection />
     </>
   );
 }
@@ -61,10 +127,28 @@ function HomeBrandRow({ iconWidth, wordmarkHeight, marginLeft }: HomeBrandRowPro
   );
 }
 
+function HomeSection({
+  className,
+  id,
+  children,
+}: {
+  className: string;
+  id?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Box id={id} className={`app-content-section ${className}`}>
+      <Box className="home-section-inner" sx={{ width: '100%', maxWidth: '100%' }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
 function Home() {
   return (
     <Box className='app-content-page'>
-      <Box className='app-content-home'>
+      <Box id="hero" className='app-content-home'>
         <Box className='app-content-home-left'>
           <Box className='app-content-home-left-content'>
             <Box
@@ -73,66 +157,83 @@ function Home() {
                 backgroundRepeat: 'no-repeat',
               }}
               className='app-content-home-left-image'
-            >
-            </Box>
+            />
             <Box className='app-content-home-left-banner-small' sx={{ pr: 3 }}>
-              <HomeBrandRow iconWidth="72px" wordmarkHeight="28px" marginLeft={-0.25} />
-              <Typography sx={{ pt: 3, color: '#d2d2d2', fontSize: '1.5em' }}>
-                A space where algorithms think, stories breathe, and art inspires.
-              </Typography>
-              <Typography sx={{ color: '#d2d2d2', fontSize: '1.5em' }}>
-                Building softwares at the intersection of AI, code, art, and ideas.
-              </Typography>
-              <HomeDeepThoughtSection />
+              <HomeBrandRow iconWidth="72px" wordmarkHeight="28px" marginLeft={-0.75} />
+              <HomeHeroIntro />
             </Box>
 
             <Box className='app-content-home-left-banner' sx={{ pr: '45px' }}>
-              <HomeBrandRow iconWidth="96px" wordmarkHeight="36px" marginLeft={-0.75} />
-              <Typography sx={{ pt: 4, color: '#d2d2d2', fontSize: '1.5em' }}>
-                A space where algorithms think, stories breathe, and art inspires.
-              </Typography>
-              <Typography sx={{ color: '#d2d2d2', fontSize: '1.5em' }}>
-                Building softwares at the intersection of AI, code, art, and ideas.
-              </Typography>
-              <HomeDeepThoughtSection />
+              <HomeBrandRow iconWidth="96px" wordmarkHeight="36px" marginLeft={-1} />
+              <HomeHeroIntro subtitlePt={4} />
             </Box>
           </Box>
         </Box>
-        <Box sx={{
-          backgroundImage: 'url("hero1.jpg")', // Replace with your image path
-          backgroundSize: 'cover', // Adjust as needed (contain, 100% 100%, etc.)
-          backgroundRepeat: 'no-repeat',
-        }} className='app-content-home-right'>
-        </Box>
+        <Box
+          sx={{
+            backgroundImage: 'url("hero1.jpg")',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+          }}
+          className='app-content-home-right'
+        />
       </Box>
-      <Box className='app-content-section app-content-provide-services'>
-        <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
-          Services we provide
+
+      <HomeSection className="app-content-provide-services" id="services">
+        <SectionHeading>Services we provide</SectionHeading>
+        <Typography
+          variant="body1"
+          className="home-section-intro"
+          sx={{ mt: 2, color: 'text.secondary', width: '100%', maxWidth: 'none' }}
+        >
+          A product menu, not a buzzword buffet — each service ships a concrete outcome.
         </Typography>
-        <Typography sx={{ mt: 2, color: '#d2d2d2', fontSize: '1.5em' }}>
-          AI development, software engineering, and technical consulting at the intersection of intelligence and craft.
+        <ServicesOfferings />
+      </HomeSection>
+
+      <HomeSection className="app-content-proof" id="proof">
+        <SectionHeading>What we&apos;ve built</SectionHeading>
+        <Typography
+          variant="body1"
+          className="home-section-intro"
+          sx={{ mt: 2, color: 'text.secondary', width: '100%', maxWidth: 'none' }}
+        >
+          We ship real software. Start with something you can talk to.
         </Typography>
-      </Box>
-      <Box className='app-content-section app-content-explore'>
-        <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
-          Explore and Learn
+        <ProofShowcase />
+        <HomeThemeNote />
+      </HomeSection>
+
+      <HomeSection className="app-content-explore" id="explore">
+        <SectionHeading>Explore and Learn</SectionHeading>
+        <Typography
+          variant="body1"
+          className="home-section-intro"
+          sx={{ mt: 2, color: 'text.secondary', width: '100%', maxWidth: 'none' }}
+        >
+          Our writing reflects deep interest in AI, code, and ideas — technical curiosity, not generic corporate blog filler.
         </Typography>
-        <BlogHighlights></BlogHighlights>
-      </Box>
-      <Box id="about" className='app-content-section app-content-about'>
-        <Typography sx={{ mt: '30px', color: '#f9f0ff', fontSize: '2.5em', fontWeight: 'bold' }}>
-          About the company
+        <BlogHighlights />
+      </HomeSection>
+
+      <HomeSection className="app-content-about" id="about">
+        <SectionHeading>About the company</SectionHeading>
+        <Typography
+          variant="body1"
+          className="home-section-intro"
+          sx={{ mt: 2, color: 'text.secondary', width: '100%', maxWidth: 'none' }}
+        >
+          Neurosentia is a space where algorithms think, stories breathe, and art inspires — a studio of builders and
+          thinkers at the crossroads of AI, code, art, and ideas. We care about distinctive design, capable systems,
+          and software that feels considered down to the last detail.
         </Typography>
-        <Typography sx={{ mt: 2, color: '#d2d2d2', fontSize: '1.5em' }}>
-          Neurosentia is a space where algorithms think, stories breathe, and art inspires — building software at the
-          crossroads of AI, code, art, and ideas.
-        </Typography>
-      </Box>
+      </HomeSection>
+
       <Box component="footer" className='app-content-section app-content-contact'>
         <HomeFooter />
       </Box>
     </Box>
-  )
+  );
 }
 
-export default Home
+export default Home;

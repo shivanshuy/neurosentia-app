@@ -23,14 +23,14 @@ export default function PageItem(item: PageItemProp) {
     let contentItems = []
     if (item.header) {
         contentItems.push(
-            <Typography gutterBottom align="center" sx={{ mb: 3, fontSize: '1.8rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#353E47', marginTop: '16px' }}>{item.header}</Typography>
+            <Typography variant="h2" gutterBottom align="center" sx={{ mb: 3, mt: 2, fontFamily: 'var(--ns-font-mono)', color: '#353E47', textTransform: 'none', letterSpacing: '0.02em' }}>{item.header}</Typography>
         )
     }
     if (item.text) {
         contentItems.push(
-            <Box sx={{ fontSize: '15px', fontWeight: 400, color: '#353E47', fontFamily: 'monospace' }} >
+            <Typography variant="body2" sx={{ color: '#353E47', fontFamily: 'var(--ns-font-mono)' }}>
                 {item.text}
-            </Box>
+            </Typography>
         )
     }
 
@@ -39,17 +39,17 @@ export default function PageItem(item: PageItemProp) {
             if(!element) return; // Skip undefined elements
             if (element.type === 'header') {
                 contentItems.push(
-                    <Typography gutterBottom sx={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#353E47', marginTop: '10px' }}>{element.text}</Typography>
+                    <Typography variant="h3" gutterBottom sx={{ color: '#353E47', mt: 1.25 }}>{element.text}</Typography>
                 )
             } else if (element.type === 'subHeader') {
                 contentItems.push(
-                    <Typography gutterBottom sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#353E47', marginTop: '10px' }}>{element.text}</Typography>
+                    <Typography variant="h4" gutterBottom sx={{ color: '#353E47', mt: 1.25 }}>{element.text}</Typography>
                 )
             } else if (element.type === 'text') {
                 contentItems.push(
-                    <Box sx={{ fontSize: '15px', fontWeight: 400, color: '#353E47', fontFamily: 'monospace' }} >
+                    <Typography variant="body2" sx={{ color: '#353E47', fontFamily: 'var(--ns-font-mono)' }}>
                         {element.text}
-                    </Box>
+                    </Typography>
                 )
             } else if (element.type === 'code' && element.code) {
                 contentItems.push(
@@ -57,7 +57,7 @@ export default function PageItem(item: PageItemProp) {
                 )
             } else if (element.type === 'image' && element.src) {
                 contentItems.push(
-                    <Box sx={{ fontSize: '15px', fontWeight: 400, color: '#353E47', fontFamily: 'monospace', }} >
+                    <Box sx={{ color: '#353E47', fontFamily: 'var(--ns-font-mono)' }}>
                         <Image src={element.src} width='70%' />
                     </Box>
                 )
@@ -68,15 +68,11 @@ export default function PageItem(item: PageItemProp) {
                             display: 'flex',
                             flexDirection: 'row',
                             marginTop: '10px',
-                            fontSize: '15px',
-                            fontWeight: 400,
                             color: '#353E47',
-                            fontFamily: 'monospace',
+                            fontFamily: 'var(--ns-font-mono)',
                         }}>
-                        <Typography variant="h6" gutterBottom sx={{
-                            fontFamily: 'monospace', color: '#353E47', paddingTop: '2px'
-                        }}>Go to - </Typography>
-                        <Link href={element.href} sx={{ textDecorationLine: 'none', fontFamily: 'monospace', marginLeft: '5px' }} variant="body2">
+                        <Typography variant="overline" gutterBottom sx={{ color: '#353E47', pt: 0.25 }}>Go to — </Typography>
+                        <Link href={element.href} sx={{ textDecorationLine: 'none', fontFamily: 'var(--ns-font-mono)', marginLeft: '5px' }} variant="body2">
                             {element.text}
                         </Link>
                     </Box>
@@ -88,15 +84,11 @@ export default function PageItem(item: PageItemProp) {
                             display: 'flex',
                             flexDirection: 'row',
                             marginTop: '10px',
-                            fontSize: '15px',
-                            fontWeight: 400,
                             color: '#353E47',
-                            fontFamily: 'monospace',
+                            fontFamily: 'var(--ns-font-mono)',
                         }}>
-                        <Typography variant="h6" gutterBottom sx={{
-                            fontFamily: 'monospace', color: '#353E47', paddingTop: '2px'
-                        }}>External Reference - </Typography>
-                        <Link href={element.href} sx={{ textDecorationLine: 'none', fontFamily: 'monospace', marginLeft: '5px' }} variant="body2">
+                        <Typography variant="overline" gutterBottom sx={{ color: '#353E47', pt: 0.25 }}>External Reference — </Typography>
+                        <Link href={element.href} sx={{ textDecorationLine: 'none', fontFamily: 'var(--ns-font-mono)', marginLeft: '5px' }} variant="body2">
                             {element.text}
                         </Link>
                     </Box>
