@@ -14,7 +14,6 @@ import { styled } from '@mui/material/styles';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import PageList from '../PageList';
 import { useSettings } from '../SettingsProvider';
-
 type PageItem = {
   key: string;
   route: string;
@@ -24,11 +23,11 @@ type PageItem = {
 const pages: PageItem[] = [{ text: 'Home', route: '/', key: 'HOME' }, ...PageList];
 
 const StyledToolbar = styled(Toolbar)(() => ({
-  alignItems: 'flex-start',
+  alignItems: 'center',
   paddingTop: 0,
   paddingBottom: 0,
   '@media all': {
-    minHeight: '50px',
+    minHeight: '56px',
   },
 }));
 
@@ -125,10 +124,10 @@ const AppBarComponent = () => {
 
   return (
     <div className="app-bar-top">
-      <AppBar position="static" sx={{ bgcolor: 'background.default' }}>
+      <AppBar position="static" elevation={0} sx={{ bgcolor: 'transparent' }}>
         <StyledToolbar>
-          <IconButton sx={{ mt: '8px' }} onClick={toggleDrawer(true)} aria-label="Open menu">
-            <MenuRoundedIcon sx={{ color: 'text.primary' }} />
+          <IconButton onClick={toggleDrawer(true)} aria-label="Open menu">
+            <MenuRoundedIcon sx={{ color: 'primary.main' }} />
           </IconButton>
         </StyledToolbar>
       </AppBar>
