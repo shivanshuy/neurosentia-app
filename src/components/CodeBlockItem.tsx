@@ -7,7 +7,7 @@ type CodeBlockItemProps = {
 
 export default function CodeBlockItem({ codeText }: CodeBlockItemProps) {
     return (
-        <Box sx={{ fontSize: '14px', fontWeight: 400, color: '#353E47', fontFamily: 'monospace', margin: '10px' }} >
+        <Box sx={{ fontSize: '0.8125rem', fontWeight: 400, color: '#353E47', fontFamily: 'var(--ns-font-mono)', margin: '10px' }} >
             <CopyBlock
                 language="javascript"
                 text={codeText}

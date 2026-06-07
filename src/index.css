@@ -1,13 +1,47 @@
 :root {
-  font-family: monospace, Helvetica, Arial, sans-serif;
+  --ns-bg: #1d1d1d;
+  --ns-bg-paper: #252525;
+  --ns-text: #f9f0ff;
+  --ns-text-secondary: #d2d2d2;
+  --ns-text-muted: #b1b1b1;
+  --ns-accent: #d4af37;
+  --ns-footer: #c9a227;
+  --ns-border: #454041;
+  --ns-on-accent: #1d1d1d;
+  --ns-accent-muted: rgba(212, 175, 55, 0.12);
+  --ns-hover-bg: rgba(249, 240, 255, 0.05);
+  --ns-font-sans: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --ns-font-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --ns-font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+
+  --ns-text-xs: 0.75rem;
+  --ns-text-sm: 0.875rem;
+  --ns-text-base: 1rem;
+  --ns-text-lg: 1.125rem;
+  --ns-text-xl: 1.375rem;
+  --ns-text-2xl: 1.875rem;
+
+  --ns-footer-logo: var(--ns-text-base);
+  --ns-footer-label: var(--ns-text-xs);
+  --ns-footer-nav: 0.8125rem;
+  --ns-footer-icon: 1.375rem;
+
+  font-family: var(--ns-font-sans);
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--ns-text);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 769px) {
+  :root {
+    --ns-footer-logo: var(--ns-text-lg);
+    --ns-footer-nav: var(--ns-text-sm);
+    --ns-footer-icon: 1.5rem;
+  }
 }
 
 body {
@@ -15,5 +49,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: monospace, Helvetica, Arial, sans-serif;
+  font-family: var(--ns-font-sans);
+  font-size: var(--ns-text-base);
+  background-color: var(--ns-bg);
 }

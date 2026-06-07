@@ -47,7 +47,7 @@ export default function ChatBot() {
             <Box className='chat-bot-content'>
                 <Box className='chat-bot-content-main'>
                     <Box className='chat-bot-pre-messsage-header'>
-                        <Typography sx={{ mt: '2px', color: '#1d1d1d', fontSize: '2.5em', fontWeight: 'bold' }}>
+                        <Typography variant="h2" sx={{ mt: '2px', color: '#1d1d1d', textTransform: 'none', letterSpacing: '0.02em' }}>
                             Chatterbug
                         </Typography>
                     </Box>
