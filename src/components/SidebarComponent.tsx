@@ -17,6 +17,7 @@ import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined
 import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
 import PermContactCalendarOutlinedIcon from '@mui/icons-material/PermContactCalendarOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined';
 import PageList from '../PageList';
 import { useSettings } from '../SettingsProvider';
 
@@ -28,6 +29,7 @@ type PageItem = {
 
 const iconByKey: Record<string, ReactNode> = {
   CHATBOT: <SmartToyOutlinedIcon />,
+  CHATBOT_BACKUP: <ArchiveOutlinedIcon />,
   AI: <PsychologyOutlinedIcon />,
   PROGRAMMING: <TerminalOutlinedIcon />,
   MATHS: <FunctionsOutlinedIcon />,

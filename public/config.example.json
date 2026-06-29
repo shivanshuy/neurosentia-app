@@ -1,0 +1,5 @@
+{
+  "langGraphUrl": "https://serve.example.com",
+  "ingestUrl": "https://serve.example.com/ingest",
+  "ingestChunksPerRequest": 20
+}
