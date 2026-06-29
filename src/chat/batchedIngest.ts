@@ -3,15 +3,15 @@
  * Example: 100 chunks with chunks_per_request=20 → 5 HTTP calls (not 100).
  */
 
+import { getServeConfig } from '../config/serve';
+
 const CHUNK_SIZE = 1_000;
 const CHUNK_OVERLAP = 200;
 const PREVIEW_CHARS = 8_000;
 
-/** Chunks per HTTP request — override via VITE_INGEST_CHUNKS_PER_REQUEST (e.g. 5, 10, 20). */
+/** Chunks per HTTP request — from config.json ingestChunksPerRequest. */
 export function chunksPerRequest(): number {
-  const raw = import.meta.env.VITE_INGEST_CHUNKS_PER_REQUEST;
-  const parsed = raw ? Number(raw) : 20;
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 20;
+  return getServeConfig().ingestChunksPerRequest;
 }
 
 export type IngestChunk = {

@@ -18,9 +18,7 @@ import { buildSessionBriefingsContext, buildSessionDocumentContext, enabledSourc
 import type { StoredChatMessage } from './chatHistory';
 import { createMessageId } from './chatHistory';
 import { loadPersonaMode, loadUserLocation } from './chat/preferences';
-
-const SERVE_URL = import.meta.env.VITE_NEUROSENTIA_SERVE_URL ?? '/api/langgraph';
-const INGEST_URL = import.meta.env.VITE_NEUROSENTIA_INGEST_URL ?? '/api/ingest';
+import { getServeConfig } from './config/serve';
 const CHATTERBUG_ASSISTANT_ID = 'chatterbug';
 const SUMMARIZE_ASSISTANT_ID = 'summarize';
 const DIAGRAM_ASSISTANT_ID = 'diagram';
@@ -235,7 +233,7 @@ async function ensureThread(sessionId: string | null): Promise<string> {
   if (sessionId) return sessionId;
 
   const { data } = await axios.post<{ thread_id: string }>(
-    `${SERVE_URL}/threads`,
+    `${getServeConfig().langGraphUrl}/threads`,
     {},
     { headers: { 'Content-Type': 'application/json' } },
   );
@@ -310,7 +308,7 @@ function parseThreadMessages(state: unknown): StoredChatMessage[] {
 }
 
 async function fetchThreadState(threadId: string): Promise<unknown> {
-  const { data } = await axios.get(`${SERVE_URL}/threads/${threadId}/state`, {
+  const { data } = await axios.get(`${getServeConfig().langGraphUrl}/threads/${threadId}/state`, {
     headers: { Accept: 'application/json' },
   });
   return data;
@@ -409,7 +407,7 @@ function assistantContentAfterLatestUser(messages: StoredChatMessage[]): string 
 async function cancelRun(threadId: string, runId: string) {
   try {
     await axios.post(
-      `${SERVE_URL}/threads/${threadId}/runs/${runId}/cancel`,
+      `${getServeConfig().langGraphUrl}/threads/${threadId}/runs/${runId}/cancel`,
       { wait: false, action: 'interrupt' },
       { headers: { 'Content-Type': 'application/json' } },
     );
@@ -432,7 +430,7 @@ const streamAIMessage = async (
 
   let response: Response;
   try {
-    response = await fetch(`${SERVE_URL}/threads/${threadId}/runs/stream`, {
+    response = await fetch(`${getServeConfig().langGraphUrl}/threads/${threadId}/runs/stream`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -537,7 +535,7 @@ async function runThreadAssistant(
   signal?: AbortSignal,
 ): Promise<unknown> {
   const { data } = await axios.post(
-    `${SERVE_URL}/threads/${sessionId}/runs/wait`,
+    `${getServeConfig().langGraphUrl}/threads/${sessionId}/runs/wait`,
     {
       assistant_id: assistantId,
       input: {},
@@ -627,7 +625,7 @@ async function ingestUrl(
 ) {
   const threadId = await ensureThread(sessionId);
   const { data } = await axios.post(
-    `${SERVE_URL}/threads/${threadId}/runs/wait`,
+    `${getServeConfig().langGraphUrl}/threads/${threadId}/runs/wait`,
     {
       assistant_id: INGEST_ASSISTANT_ID,
       input: {
@@ -654,7 +652,7 @@ async function ingestDocument(
 ) {
   const threadId = await ensureThread(sessionId);
   const result = await sendIngestChunks(
-    INGEST_URL,
+    getServeConfig().ingestUrl,
     {
       thread_id: threadId,
       source_id: sourceId,
@@ -684,7 +682,7 @@ async function ingestImage(
 ) {
   const threadId = await ensureThread(sessionId);
   const result = await sendIngestImage(
-    INGEST_URL,
+    getServeConfig().ingestUrl,
     {
       thread_id: threadId,
       source_id: sourceId,
@@ -711,14 +709,14 @@ async function deleteDocumentSource(
   signal?: AbortSignal,
 ) {
   if (!sessionId?.trim()) return;
-  await deleteIngestSource(INGEST_URL, sessionId.trim(), sourceId.trim(), signal);
+  await deleteIngestSource(getServeConfig().ingestUrl, sessionId.trim(), sourceId.trim(), signal);
 }
 
 const getAIMessage = async (message: string, sessionId: string | null) => {
   const threadId = await ensureThread(sessionId);
 
   const { data } = await axios.post(
-    `${SERVE_URL}/threads/${threadId}/runs/wait`,
+    `${getServeConfig().langGraphUrl}/threads/${threadId}/runs/wait`,
     buildRunBody(message, {}, threadId),
     { headers: { 'Content-Type': 'application/json' } },
   );

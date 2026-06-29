@@ -1,0 +1,5 @@
+{
+  "langGraphUrl": "/api/langgraph",
+  "ingestUrl": "/api/ingest",
+  "ingestChunksPerRequest": 20
+}

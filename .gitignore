@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Optional local Vite overrides (app config is public/config.json)
+.env
+.env.local
+.env.production
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
