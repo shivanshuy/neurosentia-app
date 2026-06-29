@@ -1,5 +1,6 @@
   const PageList = [
     { text: "Turing's Dream", route: "/chatterbug", key: "CHATBOT" },
+    { text: "Chat Archive (tmp)", route: "/chatterbug-backup", key: "CHATBOT_BACKUP" },
     { text: 'About AI', route: "/ai-blog-items", key: "AI" },
     { text: 'About Code', route: "/coding-blog", key: "PROGRAMMING" },
     { text: 'Euclidean Space', route: "/maths", key: "MATHS" },

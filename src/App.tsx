@@ -4,6 +4,7 @@ import Home from './Home';
 import AIBlog from './AIBlogItems';
 import Blog from './Blog';
 import ChatBot from './ChatBot';
+import ChatBotBackup from './pages/ChatBotBackup';
 import AIAgents from './AIAgents';
 import ReactAgentWithLangGraph from './pages/ReactAgentWithLangGraph';
 
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/chatterbug" element={<ChatBot />} />
+        <Route path="/chatterbug-backup" element={<ChatBotBackup />} />
         <Route path="/ai-blog-items" element={<AIBlog />} />
         <Route path="/ai-agents" element={<AIAgents />} />
         <Route path="/react-agent-langgraph" element={<ReactAgentWithLangGraph />} />

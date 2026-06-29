@@ -33,6 +33,10 @@ function ColorThemePicker() {
                   className="color-theme-picker-swatch"
                   style={{
                     background: `linear-gradient(135deg, ${item.colors.accent} 50%, ${item.colors.footer} 50%)`,
+                    border:
+                      item.id === 'white-on-black'
+                        ? `1px solid ${item.colors.border}`
+                        : undefined,
                     ...(active ? { boxShadow: `0 0 0 2px ${item.colors.accent}` } : {}),
                   }}
                   aria-hidden="true"

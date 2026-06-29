@@ -129,7 +129,7 @@ export function getStoredFontPreset(): FontPresetId {
   if (stored && stored in fontPresets) {
     return stored as FontPresetId;
   }
-  return 'current';
+  return 'original';
 }
 
 export function applyFontPreset(presetId: FontPresetId) {

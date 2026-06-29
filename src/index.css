@@ -1,22 +1,22 @@
 :root {
-  --ns-bg: #1d1d1d;
-  --ns-bg-paper: #252525;
-  --ns-text: #f9f0ff;
-  --ns-text-secondary: #d2d2d2;
-  --ns-text-muted: #b1b1b1;
-  --ns-accent: #d4af37;
-  --ns-footer: #c9a227;
-  --ns-border: #454041;
-  --ns-on-accent: #1d1d1d;
-  --ns-accent-muted: rgba(212, 175, 55, 0.12);
-  --ns-hover-bg: rgba(249, 240, 255, 0.05);
+  --ns-bg: #0a0a0a;
+  --ns-bg-paper: #141414;
+  --ns-text: #f5f5f5;
+  --ns-text-secondary: #c8c8c8;
+  --ns-text-muted: #8a8a8a;
+  --ns-accent: #ffffff;
+  --ns-footer: #e8e8e8;
+  --ns-border: #3a3a3a;
+  --ns-on-accent: #0a0a0a;
+  --ns-accent-muted: rgba(255, 255, 255, 0.12);
+  --ns-hover-bg: rgba(255, 255, 255, 0.05);
   --ns-scrollbar-size: 10px;
   --ns-scrollbar-track: color-mix(in srgb, var(--ns-bg-paper) 65%, var(--ns-bg));
   --ns-scrollbar-thumb: var(--ns-accent);
   --ns-scrollbar-thumb-hover: color-mix(in srgb, var(--ns-accent) 72%, white);
-  --ns-font-sans: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
-  --ns-font-display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
-  --ns-font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+  --ns-font-sans: monospace, Helvetica, Arial, sans-serif;
+  --ns-font-display: monospace, Helvetica, Arial, sans-serif;
+  --ns-font-mono: monospace, Helvetica, Arial, sans-serif;
 
   --ns-text-xs: 0.75rem;
   --ns-text-sm: 0.875rem;

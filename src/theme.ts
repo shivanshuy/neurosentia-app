@@ -352,5 +352,8 @@ export function createNeurosentiaTheme(colors: ColorThemeColors, mode: 'dark' | 
 
 
 
-export const neurosentiaTheme = createNeurosentiaTheme(colorThemes.gold.colors, 'dark');
+export const neurosentiaTheme = createNeurosentiaTheme(
+  colorThemes['white-on-black'].colors,
+  'dark',
+);
 

@@ -62,8 +62,8 @@
     },
   };
 
-  var id = localStorage.getItem('ns-font-preset') || 'current';
-  var preset = presets[id] || presets.current;
+  var id = localStorage.getItem('ns-font-preset') || 'original';
+  var preset = presets[id] || presets.original;
   var root = document.documentElement;
   root.style.setProperty('--ns-font-sans', preset.sans);
   root.style.setProperty('--ns-font-display', preset.display);
