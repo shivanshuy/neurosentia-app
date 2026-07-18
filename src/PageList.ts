@@ -1,8 +1,7 @@
   const PageList = [
     { text: "Turing's Dream", route: "/chatterbug", key: "CHATBOT" },
-    { text: "Chat Archive (tmp)", route: "/chatterbug-backup", key: "CHATBOT_BACKUP" },
     { text: 'About AI', route: "/ai-blog-items", key: "AI" },
-    { text: 'About Code', route: "/coding-blog", key: "PROGRAMMING" },
+    { text: 'Fine tune your LLM', route: '/fine-tune', key: 'PROGRAMMING' },
     { text: 'Euclidean Space', route: "/maths", key: "MATHS" },
     { text: 'Mind And Matter', route: "/philosophy", key: "PHILOSOPHY" },
     { text: 'Bookshelf', route: "/books", key: "BOOKS" },

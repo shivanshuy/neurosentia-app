@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import SidebarComponent from "./components/SidebarComponent";
-import { BrowserRouter } from "react-router";
+import { HashRouter } from "react-router";
 import AppBarComponent from "./components/AppBarComponent.tsx";
 import { FontPresetProvider } from './FontPresetProvider';
 import { ColorThemeProvider } from './ColorThemeProvider';
@@ -29,7 +29,7 @@ function ConfigLoadError({ message }: { message: string }) {
 function renderApp() {
   root.render(
     <StrictMode>
-      <BrowserRouter>
+      <HashRouter>
         <ColorThemeProvider>
           <FontPresetProvider>
             <SettingsProvider>
@@ -44,7 +44,7 @@ function renderApp() {
             </SettingsProvider>
           </FontPresetProvider>
         </ColorThemeProvider>
-      </BrowserRouter>
+      </HashRouter>
     </StrictMode>,
   );
 }

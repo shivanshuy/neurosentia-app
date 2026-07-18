@@ -92,41 +92,16 @@ export function exportConversation(
   exportMessages(conversation.messages, format, title);
 }
 
-export function exportSummary(
-  summary: string,
-  title: string,
-  format: 'md' | 'txt',
-  mermaid?: string,
-) {
+export function exportSummary(summary: string, title: string, format: 'md' | 'txt') {
   const safeName = `${title.replace(/[^\w.-]+/g, '_').slice(0, 36) || 'transmission'}_summary`;
   const exported = new Date().toLocaleString();
-  const diagramBlock = mermaid?.trim()
-    ? format === 'md'
-      ? `\n\n## Line diagram\n\n\`\`\`mermaid\n${mermaid.trim()}\n\`\`\`\n`
-      : `\n\nLine diagram:\n${mermaid.trim()}\n`
-    : '';
 
   if (format === 'md') {
-    const content = `# ${title} — Summary\n\nExported ${exported}\n\n${summary}${diagramBlock}`;
+    const content = `# ${title} — Summary\n\nExported ${exported}\n\n${summary}`;
     downloadTextFile(`${safeName}.md`, content, 'text/markdown');
     return;
   }
 
-  const content = `${title} — Summary\nExported ${exported}\n${'='.repeat(48)}\n\n${summary}${diagramBlock}`;
-  downloadTextFile(`${safeName}.txt`, content, 'text/plain');
-}
-
-export function exportDiagram(mermaid: string, title: string, format: 'md' | 'txt') {
-  const safeName = `${title.replace(/[^\w.-]+/g, '_').slice(0, 36) || 'transmission'}_diagram`;
-  const exported = new Date().toLocaleString();
-  const source = mermaid.trim();
-
-  if (format === 'md') {
-    const content = `# ${title} — Line diagram\n\nExported ${exported}\n\n\`\`\`mermaid\n${source}\n\`\`\`\n`;
-    downloadTextFile(`${safeName}.md`, content, 'text/markdown');
-    return;
-  }
-
-  const content = `${title} — Line diagram\nExported ${exported}\n${'='.repeat(48)}\n\n${source}\n`;
+  const content = `${title} — Summary\nExported ${exported}\n${'='.repeat(48)}\n\n${summary}`;
   downloadTextFile(`${safeName}.txt`, content, 'text/plain');
 }

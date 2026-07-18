@@ -1,0 +1,2 @@
+{"messages":[{"role":"user","content":"User message here"},{"role":"assistant","content":"Assistant reply you want the model to learn"}]}
+{"messages":[{"role":"user","content":"Follow-up question"},{"role":"assistant","content":"Follow-up answer"}]}

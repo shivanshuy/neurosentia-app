@@ -1,0 +1,3 @@
+{"query":"How do I reset my password?","positive":"Open Settings, go to Security, and choose Reset password. You will receive a confirmation email."}
+{"query":"Where are invoices stored?","positive":"Invoices are under Billing > Invoice history. You can download PDF copies from each row."}
+{"query":"What is RAG?","positive":"Retrieval-Augmented Generation combines search over your documents with an LLM so answers cite relevant context."}

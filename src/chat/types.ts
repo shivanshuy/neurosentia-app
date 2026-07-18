@@ -69,12 +69,6 @@ export type StreamRunResult = {
 
 export type ThreadSummarizeResult = {
   summary: string;
-  mermaid: string;
-  messageCount: number;
-};
-
-export type ThreadDiagramResult = {
-  mermaid: string;
   messageCount: number;
 };
 
