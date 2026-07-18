@@ -8,9 +8,9 @@ const aiAgentContent = {
         },
         {
             type: "text",
-            text: `"Chatbots" are great at answering simple questions and performing basic tasks.
-            "Workflows" are systems where LLMs and tools are orchestrated through predefined code paths. Workflows automate tasks but lack reasoning and predefined paths cannot be altered.
-            "Agents", on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks. They combine reasoning, action, and memory to pursue goals independently.`
+            text: `**"Chatbots"** are great at answering simple questions and performing basic tasks.
+            **"Workflows"** are systems where LLMs and tools are orchestrated through predefined code paths. Workflows automate tasks but lack reasoning and predefined paths cannot be altered.
+            **"Agents"**, on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks. They combine reasoning, action, and memory to pursue goals independently.`
         },
         {
             type: "header",

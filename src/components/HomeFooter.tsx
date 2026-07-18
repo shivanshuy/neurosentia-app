@@ -6,11 +6,11 @@ import { FaComments, FaEnvelope, FaInstagram, FaTwitter, FaDribbble } from 'reac
 const CONTACT_EMAIL = 'ueurosent@gmail.com';
 
 const footerNavLinks = [
-  { label: 'Services', to: '/#services' },
-  { label: "What we've built", to: '/#proof' },
-  { label: 'Explore', to: '/#explore' },
+  { label: 'Services', to: '/', scrollTo: 'services' },
+  { label: "What we've built", to: '/', scrollTo: 'proof' },
+  { label: 'Explore', to: '/', scrollTo: 'explore' },
   { label: 'About AI', to: '/ai-blog-items' },
-  { label: 'About', to: '/#about' },
+  { label: 'About', to: '/', scrollTo: 'about' },
 ];
 
 const socialLinks = [
@@ -38,26 +38,32 @@ function scrollToTarget(targetId: string | null) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function FooterNavLink({ to, label }: { to: string; label: string }) {
+function FooterNavLink({
+  to,
+  label,
+  scrollTo,
+}: {
+  to: string;
+  label: string;
+  scrollTo?: string;
+}) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    const [path, hash] = to.split('#');
-    const targetPath = path || '/';
-    const targetId = hash || null;
-
-    if (location.pathname === targetPath) {
-      event.preventDefault();
-      scrollToTarget(targetId);
+    if (!scrollTo) {
       return;
     }
 
-    if (targetId) {
+    if (location.pathname === to) {
       event.preventDefault();
-      navigate(`${targetPath}#${targetId}`);
-      window.setTimeout(() => scrollToTarget(targetId), 150);
+      scrollToTarget(scrollTo);
+      return;
     }
+
+    event.preventDefault();
+    navigate(to);
+    window.setTimeout(() => scrollToTarget(scrollTo), 150);
   };
 
   return (
@@ -152,7 +158,12 @@ function HomeFooter() {
                 Explore
               </Box>
               {footerNavLinks.map((item) => (
-                <FooterNavLink key={item.label} to={item.to} label={item.label} />
+                <FooterNavLink
+                  key={item.label}
+                  to={item.to}
+                  label={item.label}
+                  scrollTo={item.scrollTo}
+                />
               ))}
             </nav>
           </Box>

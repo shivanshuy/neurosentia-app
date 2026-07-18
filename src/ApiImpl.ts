@@ -7,7 +7,6 @@ import type {
   SearchSource,
   StreamRunOptions,
   StreamRunResult,
-  ThreadDiagramResult,
   ThreadSummarizeResult,
 } from './chat/types';
 import { deleteIngestSource, sendIngestChunks } from './chat/batchedIngest';
@@ -21,7 +20,6 @@ import { loadPersonaMode, loadUserLocation } from './chat/preferences';
 import { getServeConfig } from './config/serve';
 const CHATTERBUG_ASSISTANT_ID = 'chatterbug';
 const SUMMARIZE_ASSISTANT_ID = 'summarize';
-const DIAGRAM_ASSISTANT_ID = 'diagram';
 const INGEST_ASSISTANT_ID = 'ingest';
 
 const CONTEXT_TEXT_LIMIT = 12_000;
@@ -517,18 +515,6 @@ function countThreadMessages(state: unknown): number {
   }).length;
 }
 
-function extractMermaid(state: unknown): string {
-  if (!state || typeof state !== 'object') return '';
-
-  const values = (state as { values?: { mermaid?: string } }).values;
-  if (typeof values?.mermaid === 'string') return values.mermaid;
-
-  const direct = (state as { mermaid?: string }).mermaid;
-  if (typeof direct === 'string') return direct;
-
-  return '';
-}
-
 async function runThreadAssistant(
   sessionId: string,
   assistantId: string,
@@ -561,24 +547,6 @@ async function summarizeThread(
 
   return {
     summary,
-    mermaid: extractMermaid(data).trim(),
-    messageCount: countThreadMessages(data),
-  };
-}
-
-async function diagramThread(
-  sessionId: string,
-  signal?: AbortSignal,
-): Promise<ThreadDiagramResult> {
-  const data = await runThreadAssistant(sessionId, DIAGRAM_ASSISTANT_ID, signal);
-
-  const mermaid = extractMermaid(data).trim();
-  if (!mermaid) {
-    throw new Error('Server returned an empty diagram.');
-  }
-
-  return {
-    mermaid,
     messageCount: countThreadMessages(data),
   };
 }
@@ -733,7 +701,6 @@ const getAIMessage = async (message: string, sessionId: string | null) => {
 
 export {
   deleteDocumentSource,
-  diagramThread,
   fetchSearchSources,
   fetchThreadMessages,
   fetchToolTraces,

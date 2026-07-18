@@ -4,22 +4,17 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import {
   FaCopy,
-  FaDownload,
   FaEdit,
   FaMapMarkerAlt,
   FaMicrophone,
   FaPaperclip,
-  FaPen,
   FaRedo,
   FaStop,
-  FaThumbtack,
   FaTimes,
-  FaTrash,
   FaVolumeUp,
 } from 'react-icons/fa';
 import {
   deleteDocumentSource,
-  diagramThread,
   fetchToolTraces,
   fetchThreadMessages,
   ingestDocument,
@@ -32,16 +27,14 @@ import {
 import { assessSearchSignal } from './chat/confidence';
 import { exportConversation, exportMessages } from './chat/export';
 import { buildMessageWithAttachments, extractSingleFileTextForIngest } from './chat/fileExtract';
-import { loadMemoryPins, saveMemoryPins } from './chat/memoryPins';
-import { extractMermaidBlocks, stripMermaidFences } from './chat/mermaid';
+import { loadMemoryPins } from './chat/memoryPins';
 import { parseOperatorNotes } from './chat/operatorNotes';
 import {
   loadPersonaMode,
   loadUserLocation,
-  savePersonaMode,
   saveUserLocation,
 } from './chat/preferences';
-import { loadTransmissionTemplates, saveTransmissionTemplates } from './chat/templates';
+import { STARTER_PROMPTS } from './chat/templates';
 import { isTtsSupported, speakText } from './chat/tts';
 import type { ChatMessage, ChatPersonaMode, SessionSource } from './chat/types';
 import type { ImageIngestMode } from './chat/imageIngest';
@@ -56,14 +49,11 @@ import {
 } from './chat/sessionSources';
 import type { ToolTrace } from './chat/toolTrace';
 import { isVoiceInputSupported, listenOnce } from './chat/voice';
-import logoIcon from './assets/logo-icon.png';
 import {
   type ChatConversation,
   createMessageId,
   filterConversations,
-  formatHistoryTimestamp,
   formatMessageTimestamp,
-  formatThreadId,
   getConversationDisplayTitle,
   loadChatHistory,
   persistActiveConversation,
@@ -72,20 +62,14 @@ import {
   togglePinConversation,
   upsertConversation,
 } from './chatHistory';
-import ThreadContextMap from './components/ThreadContextMap';
-import MermaidDiagram from './components/MermaidDiagram';
-import ThreadDiagramPanel from './components/ThreadDiagramPanel';
 import ThreadSummaryPanel from './components/ThreadSummaryPanel';
 import ConfidenceStrip from './components/ConfidenceStrip';
 import ToolTracePanel from './components/ToolTracePanel';
-import TimelineRail from './components/TimelineRail';
-import EntityHeatMap from './components/EntityHeatMap';
-import MemoryPinsPanel from './components/MemoryPinsPanel';
-import AudioChannel from './components/AudioChannel';
 import DocumentSessionPanel from './components/DocumentSessionPanel';
 import ChatDocsPanel from './components/ChatDocsPanel';
+import RecordingsPanel from './components/RecordingsPanel';
 
-const TABS = ['CHAT', 'CONTACTS', 'LOC', 'DOCUMENTS', 'ORDERS', 'RECORDINGS', 'MAP'] as const;
+const TABS = ['CHAT', 'DOCUMENTS', 'RECORDINGS'] as const;
 type TerminalTab = (typeof TABS)[number];
 
 const ACCEPTED_FILE_TYPES =
@@ -95,10 +79,7 @@ const AUTO_SUMMARY_COOLDOWN_MS = 5 * 60 * 1000;
 
 const AGENT_BIO =
   'TURING\'S DREAM IS A NEUROSENTIA CONVERSATIONAL INTERFACE BUILT ON LARGE-LANGUAGE-MODEL '
-  + 'INFRASTRUCTURE. THE SYSTEM HANDLES PRODUCT INQUIRIES, AI ARCHITECTURE QUESTIONS, AND '
-  + 'IMPLEMENTATION GUIDANCE. SESSIONS ARE STATEFUL VIA LANGGRAPH THREADS ON NEUROSENTIA-SERVE. ALL '
-  + 'TRANSMISSIONS ARE LOGGED FOR QUALITY ASSURANCE. OPERATORS SHOULD VERIFY CRITICAL OUTPUT '
-  + 'BEFORE DEPLOYMENT TO PRODUCTION ENVIRONMENTS.';
+  + 'INFRASTRUCTURE. ALL TRANSMISSIONS ARE LOGGED FOR QUALITY ASSURANCE.';
 
 function speakerLabel(role: ChatMessage['role']) {
   return role === 'user' ? 'YOU' : 'TURING';
@@ -117,7 +98,92 @@ function formatTransmitterClock(date: Date) {
   return `${day} ${month} ${year} · ${time}`;
 }
 
+function VuMeter({ ttsActive, vuLevel }: { ttsActive: boolean; vuLevel: number }) {
+  return (
+    <Box className="crt-vu-meter" aria-hidden="true">
+      {Array.from({ length: 12 }, (_, index) => {
+        const threshold = (index + 1) / 12;
+        const on = ttsActive && vuLevel >= threshold * 0.85;
+        return (
+          <span
+            key={index}
+            className={`crt-vu-bar${on ? ' crt-vu-bar--on' : ''}`}
+            style={{ animationDelay: `${index * 0.06}s` }}
+          />
+        );
+      })}
+    </Box>
+  );
+}
+
+const MOBILE_CHAT_LAYOUT_QUERY = '(max-width: 1024px)';
+
+function useMobileChatLayout(): boolean {
+  const subscribe = React.useCallback((onStoreChange: () => void) => {
+    const media = window.matchMedia(MOBILE_CHAT_LAYOUT_QUERY);
+    media.addEventListener('change', onStoreChange);
+    return () => media.removeEventListener('change', onStoreChange);
+  }, []);
+
+  const getSnapshot = React.useCallback(
+    () => window.matchMedia(MOBILE_CHAT_LAYOUT_QUERY).matches,
+    [],
+  );
+
+  const getServerSnapshot = React.useCallback(() => false, []);
+
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+type AgentPanelProps = {
+  placement: 'sidebar' | 'frame';
+  userLocation: string;
+  onUserLocationChange: (value: string) => void;
+  onLocationBlur: () => void;
+  disabled: boolean;
+};
+
+function AgentPanel({
+  placement,
+  userLocation,
+  onUserLocationChange,
+  onLocationBlur,
+  disabled,
+}: AgentPanelProps) {
+  const inFrame = placement === 'frame';
+
+  return (
+    <Box
+      className={`crt-agent-panel${inFrame ? ' crt-agent-panel--frame' : ''}`}
+      component={inFrame ? 'div' : 'aside'}
+      aria-label="Agent information"
+    >
+      <Box className="crt-agent-header">
+        <span className="crt-agent-title">TURING&apos;S DREAM</span>
+        <Box className="crt-pref-block crt-pref-block--inline">
+          <label className="crt-pref-label crt-pref-label--icon" htmlFor="crt-location">
+            <FaMapMarkerAlt aria-hidden="true" />
+            <span className="crt-sr-only">Location</span>
+          </label>
+          <input
+            id="crt-location"
+            className="crt-pref-input"
+            value={userLocation}
+            onChange={(e) => onUserLocationChange(e.target.value)}
+            onBlur={onLocationBlur}
+            placeholder="e.g. Pune, Maharashtra"
+            disabled={disabled}
+          />
+        </Box>
+      </Box>
+
+      <Box className="crt-bio">{AGENT_BIO}</Box>
+    </Box>
+  );
+}
+
 export default function ChatBot() {
+  const mobileLayout = useMobileChatLayout();
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [input, setInput] = React.useState('');
   const [sessionId, setSessionId] = React.useState<string | null>(null);
@@ -130,7 +196,7 @@ export default function ChatBot() {
   const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]);
   const [clock, setClock] = React.useState(() => new Date());
   const [userLocation, setUserLocation] = React.useState(() => loadUserLocation());
-  const [personaMode, setPersonaMode] = React.useState<ChatPersonaMode>(() => loadPersonaMode());
+  const [personaMode] = React.useState<ChatPersonaMode>(() => loadPersonaMode());
   const [recordingQuery, setRecordingQuery] = React.useState('');
   const [recordingFrom, setRecordingFrom] = React.useState('');
   const [recordingTo, setRecordingTo] = React.useState('');
@@ -140,23 +206,15 @@ export default function ChatBot() {
   const [renameDraft, setRenameDraft] = React.useState('');
   const [isListening, setIsListening] = React.useState(false);
   const [voiceError, setVoiceError] = React.useState<string | null>(null);
+  const [ttsActive, setTtsActive] = React.useState(false);
+  const [vuLevel, setVuLevel] = React.useState(0);
   const [activeTab, setActiveTab] = React.useState<TerminalTab>('CHAT');
   const [showSummaryPanel, setShowSummaryPanel] = React.useState(false);
-  const [showDiagramPanel, setShowDiagramPanel] = React.useState(false);
   const [threadSummary, setThreadSummary] = React.useState<string | null>(null);
-  const [threadMermaid, setThreadMermaid] = React.useState<string | null>(null);
   const [summaryMessageCount, setSummaryMessageCount] = React.useState(0);
-  const [diagramMessageCount, setDiagramMessageCount] = React.useState(0);
   const [isSummarizing, setIsSummarizing] = React.useState(false);
-  const [isDiagramming, setIsDiagramming] = React.useState(false);
   const [summarizeError, setSummarizeError] = React.useState<string | null>(null);
-  const [diagramError, setDiagramError] = React.useState<string | null>(null);
-  const [memoryPins, setMemoryPins] = React.useState<string[]>(() => loadMemoryPins());
-  const [transmissionTemplates, setTransmissionTemplates] = React.useState<string[]>(() =>
-    loadTransmissionTemplates(),
-  );
-  const [editingTemplates, setEditingTemplates] = React.useState(false);
-  const [templateDrafts, setTemplateDrafts] = React.useState<string[]>([]);
+  const [memoryPins] = React.useState<string[]>(() => loadMemoryPins());
   const [toolTraces, setToolTraces] = React.useState<ToolTrace[]>([]);
   const [showTracePanel, setShowTracePanel] = React.useState(false);
   const [sessionSources, setSessionSources] = React.useState<SessionSource[]>([]);
@@ -167,8 +225,6 @@ export default function ChatBot() {
   const [ingestError, setIngestError] = React.useState<string | null>(null);
   const [rollingSummary, setRollingSummary] = React.useState<string | null>(null);
   const [rollingSummaryAt, setRollingSummaryAt] = React.useState<number | null>(null);
-  const [ttsActive, setTtsActive] = React.useState(false);
-  const [vuLevel, setVuLevel] = React.useState(0);
 
   const scrollAnchorRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -367,25 +423,6 @@ export default function ChatBot() {
     userLocation,
   ]);
 
-  const handleDiagramThread = React.useCallback(async () => {
-    if (!sessionId || isLoading || isDiagramming || isSummarizing) return;
-
-    setShowDiagramPanel(true);
-    setShowSummaryPanel(false);
-    setIsDiagramming(true);
-    setDiagramError(null);
-
-    try {
-      const result = await diagramThread(sessionId);
-      setThreadMermaid(result.mermaid);
-      setDiagramMessageCount(result.messageCount);
-    } catch {
-      setDiagramError('Diagram generation failed — is neurosentia-serve running?');
-    } finally {
-      setIsDiagramming(false);
-    }
-  }, [sessionId, isLoading, isDiagramming, isSummarizing]);
-
   const sendMessage = React.useCallback(
     async (rawText: string, files: File[] = attachedFiles) => {
       if ((!rawText.trim() && files.length === 0) || isLoading || isExtracting) return;
@@ -395,22 +432,10 @@ export default function ChatBot() {
         return;
       }
 
-      const trimmed = rawText.trim();
-      if (trimmed.toLowerCase() === '/diagram' || trimmed.toLowerCase().startsWith('/diagram ')) {
-        setInput('');
-        setAttachedFiles([]);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        void handleDiagramThread();
-        return;
-      }
-
       setVoiceError(null);
       setSummarizeError(null);
-      setDiagramError(null);
       setThreadSummary(null);
-      setThreadMermaid(null);
       setShowSummaryPanel(false);
-      setShowDiagramPanel(false);
 
       setIsExtracting(true);
       let outgoing = rawText.trim();
@@ -440,7 +465,6 @@ export default function ChatBot() {
     },
     [
       attachedFiles,
-      handleDiagramThread,
       isExtracting,
       isLoading,
       requestAssistantReply,
@@ -546,6 +570,18 @@ export default function ChatBot() {
     setConversations((prev) =>
       persistActiveConversation(prev, activeConversationIdRef.current, messages, sessionId),
     );
+    resetSessionState();
+    inputRef.current?.focus();
+  };
+
+  const clearSession = () => {
+    stopGeneration();
+    persistSkipRef.current = true;
+    resetSessionState();
+    inputRef.current?.focus();
+  };
+
+  const resetSessionState = () => {
     persistSkipRef.current = true;
     activeConversationIdRef.current = null;
     setMessages([]);
@@ -555,13 +591,10 @@ export default function ChatBot() {
     setAttachedFiles([]);
     setEditingMessageId(null);
     setThreadSummary(null);
-    setThreadMermaid(null);
     setSummarizeError(null);
-    setDiagramError(null);
     setShowSummaryPanel(false);
-    setShowDiagramPanel(false);
+    setShowTracePanel(false);
     setSummaryMessageCount(0);
-    setDiagramMessageCount(0);
     setSessionSources([]);
     setChatWithDocs(false);
     setSourcesOnlyMode(false);
@@ -571,13 +604,11 @@ export default function ChatBot() {
     setIngestError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     setIsLoading(false);
-    inputRef.current?.focus();
   };
 
   const handleTabSelect = (tab: TerminalTab) => {
     setActiveTab(tab);
     setShowSummaryPanel(false);
-    setShowDiagramPanel(false);
     setShowTracePanel(false);
   };
 
@@ -722,23 +753,16 @@ export default function ChatBot() {
     }
   };
 
-  const handlePinsChange = (pins: string[]) => {
-    setMemoryPins(pins);
-    saveMemoryPins(pins);
-  };
-
   const handleSummarizeThread = async () => {
     if (!sessionId || isLoading || isSummarizing) return;
 
     setShowSummaryPanel(true);
-    setShowDiagramPanel(false);
     setIsSummarizing(true);
     setSummarizeError(null);
 
     try {
       const result = await summarizeThread(sessionId);
       setThreadSummary(result.summary);
-      setThreadMermaid(result.mermaid || null);
       setSummaryMessageCount(result.messageCount);
     } catch {
       setSummarizeError('Summarization failed — is neurosentia-serve running?');
@@ -770,6 +794,9 @@ export default function ChatBot() {
     setInput('');
     setAttachedFiles([]);
     setIsResuming(false);
+    setActiveTab('CHAT');
+    setShowSummaryPanel(false);
+    setShowTracePanel(false);
     inputRef.current?.focus();
   };
 
@@ -788,13 +815,9 @@ export default function ChatBot() {
     setAttachedFiles([]);
     setEditingMessageId(null);
     setThreadSummary(null);
-    setThreadMermaid(null);
     setSummarizeError(null);
-    setDiagramError(null);
     setShowSummaryPanel(false);
-    setShowDiagramPanel(false);
     setSummaryMessageCount(0);
-    setDiagramMessageCount(0);
     setSessionSources([]);
     setChatWithDocs(false);
     setSourcesOnlyMode(false);
@@ -836,11 +859,6 @@ export default function ChatBot() {
     saveUserLocation(userLocation);
   };
 
-  const handlePersonaChange = (mode: ChatPersonaMode) => {
-    setPersonaMode(mode);
-    savePersonaMode(mode);
-  };
-
   const filteredConversations = React.useMemo(
     () =>
       filterConversations(conversations, {
@@ -865,16 +883,12 @@ export default function ChatBot() {
     ? getConversationDisplayTitle(activeConversation)
     : 'Transmission';
   const panelMessageCount = summaryMessageCount || messages.filter((m) => m.content.trim()).length;
-  const diagramPanelMessageCount =
-    diagramMessageCount || messages.filter((m) => m.content.trim()).length;
   const statusText = hasError
     ? 'LOW SIGNAL'
     : isResuming
       ? 'LOADING TAPE...'
       : isSummarizing
         ? 'SUMMARIZING...'
-        : isDiagramming
-          ? 'DIAGRAMMING...'
       : isExtracting
         ? 'READING FILES...'
         : isLoading
@@ -884,81 +898,38 @@ export default function ChatBot() {
             : 'SIGNAL OK';
 
   return (
-    <Box className={`app-content-page turing-chat-page ${hasError ? 'turing-chat-page--error' : isLoading || isSummarizing || isDiagramming ? 'turing-chat-page--loading' : 'turing-chat-page--ready'}`}>
-      <Box className="crt-agent-panel" component="aside" aria-label="Agent information">
-        <Box className="crt-agent-plate">
-          <span className="crt-agent-callsign">TD·047</span>
-          <Box className="crt-agent-panel-title">AGENT INFO</Box>
-        </Box>
-
-        <Box className="crt-profile-row">
-          <Box className="crt-photo-wrap">
-            <img src={logoIcon} alt="" className="crt-photo" />
-          </Box>
-          <Box className="crt-fields">
-            <Box className="crt-field">
-              <span className="crt-field-label">AGENT:</span> TD-47-AI
-            </Box>
-            <Box className="crt-field">
-              <span className="crt-field-label">SESSION:</span> {formatThreadId(sessionId)}
-            </Box>
-            <Box className="crt-field">
-              <span className="crt-field-label">MODE:</span>
-              <span className="crt-mode-toggle">
-                <button
-                  type="button"
-                  className={`crt-mode-btn${personaMode === 'brief' ? ' crt-mode-btn--active' : ''}`}
-                  onClick={() => handlePersonaChange('brief')}
-                  disabled={isLoading}
-                >
-                  BRIEF
-                </button>
-                <button
-                  type="button"
-                  className={`crt-mode-btn${personaMode === 'architect' ? ' crt-mode-btn--active' : ''}`}
-                  onClick={() => handlePersonaChange('architect')}
-                  disabled={isLoading}
-                >
-                  ARCHITECT
-                </button>
-              </span>
-            </Box>
-          </Box>
-        </Box>
-
-        <Box className="crt-pref-block">
-          <label className="crt-pref-label" htmlFor="crt-location">
-            <FaMapMarkerAlt aria-hidden="true" /> LOC
-          </label>
-          <input
-            id="crt-location"
-            className="crt-pref-input"
-            value={userLocation}
-            onChange={(e) => setUserLocation(e.target.value)}
-            onBlur={handleLocationBlur}
-            placeholder="e.g. Pune, Maharashtra"
-            disabled={isLoading}
-          />
-        </Box>
-
-        <Box className="crt-bio">{AGENT_BIO}</Box>
-      </Box>
+    <Box className={`app-content-page turing-chat-page ${hasError ? 'turing-chat-page--error' : isLoading || isSummarizing ? 'turing-chat-page--loading' : 'turing-chat-page--ready'}`}>
+      {!mobileLayout && (
+        <AgentPanel
+          placement="sidebar"
+          userLocation={userLocation}
+          onUserLocationChange={setUserLocation}
+          onLocationBlur={handleLocationBlur}
+          disabled={isLoading}
+        />
+      )}
 
       <Box className="crt-cabinet">
         <Box className="crt-terminal">
           <Box className="crt-scanlines" aria-hidden="true" />
           <Box className="crt-bezel">
             <Box className="crt-frame">
+              {mobileLayout && (
+                <AgentPanel
+                  placement="frame"
+                  userLocation={userLocation}
+                  onUserLocationChange={setUserLocation}
+                  onLocationBlur={handleLocationBlur}
+                  disabled={isLoading}
+                />
+              )}
+
               <Box className="crt-top-bar">
-                <Box className="crt-model-plate">
-                  <span className="crt-model-name">TURING&apos;S DREAM</span>
-                  <span className="crt-version">NSYS TRANSMITTER · PLC 2.4</span>
-                </Box>
-                <Box className="crt-top-readouts">
-                  <span className="crt-clock-readout">{formatTransmitterClock(clock)}</span>
-                  <button type="button" className="crt-clear-btn" onClick={startNewThread}>
-                    CLR SESSION
-                  </button>
+                <span className="crt-version">NSYS TRANSMITTER</span>
+                <span className="crt-top-sep" aria-hidden="true">·</span>
+                <span className="crt-clock-readout">{formatTransmitterClock(clock)}</span>
+                <Box className="crt-top-signal" title={statusText} aria-label={statusText}>
+                  <VuMeter ttsActive={ttsActive} vuLevel={vuLevel} />
                 </Box>
               </Box>
 
@@ -969,7 +940,7 @@ export default function ChatBot() {
                     type="button"
                     role="tab"
                     aria-selected={tab === activeTab}
-                    className={`crt-tab${tab === activeTab && !showSummaryPanel && !showDiagramPanel ? ' crt-tab--active' : ''}`}
+                    className={`crt-tab${tab === activeTab && !showSummaryPanel && !showTracePanel ? ' crt-tab--active' : ''}`}
                     onClick={() => handleTabSelect(tab)}
                   >
                     {tab}
@@ -987,18 +958,10 @@ export default function ChatBot() {
                 <button
                   type="button"
                   className={`crt-tab crt-tab--action${showSummaryPanel ? ' crt-tab--active' : ''}${isSummarizing ? ' crt-tab--action-live' : ''}`}
-                  disabled={!sessionId || isLoading || isSummarizing || isDiagramming}
+                  disabled={!sessionId || isLoading || isSummarizing}
                   onClick={() => void handleSummarizeThread()}
                 >
                   {isSummarizing ? 'SUMMARIZING…' : 'SUMMARIZE'}
-                </button>
-                <button
-                  type="button"
-                  className={`crt-tab crt-tab--action${showDiagramPanel ? ' crt-tab--active' : ''}${isDiagramming ? ' crt-tab--action-live' : ''}`}
-                  disabled={!sessionId || isLoading || isSummarizing || isDiagramming}
-                  onClick={() => void handleDiagramThread()}
-                >
-                  {isDiagramming ? 'DIAGRAMMING…' : 'DIAGRAM'}
                 </button>
                 <button
                   type="button"
@@ -1007,7 +970,6 @@ export default function ChatBot() {
                   onClick={() => {
                     setShowTracePanel((v) => !v);
                     setShowSummaryPanel(false);
-                    setShowDiagramPanel(false);
                     if (sessionId) {
                       void fetchToolTraces(sessionId).then(setToolTraces);
                     }
@@ -1018,205 +980,10 @@ export default function ChatBot() {
               </Box>
 
               <Box className="crt-body">
-                <Box className="crt-panel crt-sidebar" component="aside">
-                  <Box className="crt-sidebar-header">
-                    <Box className="crt-sidebar-title">RECORDINGS</Box>
-                    <button
-                      type="button"
-                      className="crt-history-new-btn"
-                      onClick={startNewThread}
-                      disabled={isLoading || isResuming}
-                    >
-                      + NEW
-                    </button>
-                  </Box>
-
-                  <Box className="crt-recording-search">
-                    <input
-                      className="crt-recording-search-input"
-                      value={recordingQuery}
-                      onChange={(e) => setRecordingQuery(e.target.value)}
-                      placeholder="SEARCH..."
-                      aria-label="Search recordings"
-                    />
-                    <Box className="crt-recording-dates">
-                      <input
-                        type="date"
-                        className="crt-recording-date"
-                        value={recordingFrom}
-                        onChange={(e) => setRecordingFrom(e.target.value)}
-                        aria-label="From date"
-                      />
-                      <input
-                        type="date"
-                        className="crt-recording-date"
-                        value={recordingTo}
-                        onChange={(e) => setRecordingTo(e.target.value)}
-                        aria-label="To date"
-                      />
-                    </Box>
-                  </Box>
-
-                  {activeConversation && (
-                    <Box className="crt-recording-actions">
-                      <button
-                        type="button"
-                        className="crt-recording-action-btn"
-                        onClick={() => exportConversation(activeConversation, 'md')}
-                      >
-                        <FaDownload /> MD
-                      </button>
-                      <button
-                        type="button"
-                        className="crt-recording-action-btn"
-                        onClick={() => exportConversation(activeConversation, 'txt')}
-                      >
-                        <FaDownload /> TXT
-                      </button>
-                    </Box>
-                  )}
-
-                  <Box className="crt-history-list" role="list">
-                    {filteredConversations.length === 0 ? (
-                      <Box className="crt-history-empty">NO MATCHING RECORDINGS.</Box>
-                    ) : (
-                      filteredConversations.map((conversation) => {
-                        const isActive = conversation.id === activeConversationId;
-                        const displayTitle = getConversationDisplayTitle(conversation);
-                        const isRenaming = renamingId === conversation.id;
-
-                        return (
-                          <Box
-                            key={conversation.id}
-                            role="listitem"
-                            className={`crt-history-item${isActive ? ' crt-history-item--active' : ''}`}
-                          >
-                            {isRenaming ? (
-                              <input
-                                className="crt-rename-input"
-                                value={renameDraft}
-                                onChange={(e) => setRenameDraft(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    setConversations((prev) =>
-                                      renameConversation(prev, conversation.id, renameDraft),
-                                    );
-                                    setRenamingId(null);
-                                  }
-                                  if (e.key === 'Escape') setRenamingId(null);
-                                }}
-                                autoFocus
-                              />
-                            ) : (
-                              <>
-                                <button
-                                  type="button"
-                                  className="crt-history-item-main"
-                                  onClick={() => void resumeConversation(conversation)}
-                                  disabled={isLoading || isResuming}
-                                >
-                                  <span className="crt-history-item-title">
-                                    {conversation.pinned ? '📌 ' : ''}
-                                    {displayTitle.toUpperCase()}
-                                  </span>
-                                  <span className="crt-history-item-meta">
-                                    {formatHistoryTimestamp(conversation.updatedAt)}
-                                    {' · '}
-                                    {conversation.messages.length} MSG
-                                  </span>
-                                </button>
-                                <Box className="crt-history-item-tools">
-                                  <button
-                                    type="button"
-                                    className="crt-history-tool-btn"
-                                    title="Pin"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setConversations((prev) =>
-                                        togglePinConversation(prev, conversation.id),
-                                      );
-                                    }}
-                                  >
-                                    <FaThumbtack />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="crt-history-tool-btn"
-                                    title="Rename"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setRenamingId(conversation.id);
-                                      setRenameDraft(displayTitle);
-                                    }}
-                                  >
-                                    <FaPen />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="crt-history-tool-btn"
-                                    title="Export MD"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      exportConversation(conversation, 'md');
-                                    }}
-                                  >
-                                    <FaDownload />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="crt-history-tool-btn crt-history-tool-btn--danger"
-                                    title="Remove"
-                                    disabled={isLoading}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeRecording(conversation.id);
-                                    }}
-                                  >
-                                    <FaTrash />
-                                  </button>
-                                </Box>
-                              </>
-                            )}
-                          </Box>
-                        );
-                      })
-                    )}
-                  </Box>
-                </Box>
-
                 <Box className="crt-main">
-                  <Box className="crt-channel-strip">
-                    <span className="crt-channel-label">
-                      {showSummaryPanel
-                        ? '▸ THREAD SUMMARY'
-                        : showDiagramPanel
-                          ? '▸ LINE DIAGRAM'
-                        : showTracePanel
-                          ? '▸ TOOL TRACE'
-                          : activeTab === 'DOCUMENTS'
-                            ? '▸ DOCUMENT CHANNEL'
-                            : activeTab === 'LOC'
-                              ? '▸ MEMORY PINS'
-                              : activeTab === 'MAP'
-                                ? '▸ CONTEXT MAP'
-                                : '▸ LIVE CHANNEL'}
-                    </span>
-                    <span className="crt-channel-mode">
-                      {userLocation ? `LOC: ${userLocation.toUpperCase()}` : 'NO LOC SET'}
-                      {' · '}
-                      {personaMode === 'architect' ? 'ARCHITECT MODE' : 'BRIEF MODE'}
-                      {effectiveSourcesOnly && ' · SOURCES ONLY'}
-                      {chatWithDocs
-                        && hasEnabledSources(chatSessionSources)
-                        && ` · ${chatSessionSources.filter((s) => s.enabled).length} DOC(S)`}
-                    </span>
-                    <AudioChannel active={ttsActive} level={vuLevel} />
-                  </Box>
-
                   {showSummaryPanel ? (
                     <ThreadSummaryPanel
                       summary={threadSummary}
-                      mermaid={threadMermaid}
                       isSummarizing={isSummarizing}
                       error={summarizeError}
                       sessionId={sessionId}
@@ -1224,29 +991,8 @@ export default function ChatBot() {
                       messageCount={panelMessageCount}
                       onRefresh={() => void handleSummarizeThread()}
                     />
-                  ) : showDiagramPanel ? (
-                    <ThreadDiagramPanel
-                      mermaid={threadMermaid}
-                      isDiagramming={isDiagramming}
-                      error={diagramError}
-                      sessionId={sessionId}
-                      title={summaryTitle}
-                      messageCount={diagramPanelMessageCount}
-                      onRefresh={() => void handleDiagramThread()}
-                    />
                   ) : showTracePanel ? (
                     <ToolTracePanel traces={toolTraces} />
-                  ) : activeTab === 'MAP' ? (
-                    <Box className="crt-map-stack">
-                      <ThreadContextMap
-                        messages={messages}
-                        sessionId={sessionId}
-                        userLocation={userLocation}
-                        personaMode={personaMode}
-                      />
-                      <TimelineRail messages={messages} />
-                      <EntityHeatMap messages={messages} />
-                    </Box>
                   ) : activeTab === 'DOCUMENTS' ? (
                     <DocumentSessionPanel
                       sources={sessionSources}
@@ -1258,9 +1004,41 @@ export default function ChatBot() {
                       onIngestUrl={(url) => void handleIngestUrl(url)}
                       onDeleteSource={(id) => void handleDeleteSource(id)}
                     />
-                  ) : activeTab === 'LOC' ? (
-                    <MemoryPinsPanel pins={memoryPins} onChange={handlePinsChange} />
-                  ) : activeTab === 'CHAT' ? (
+                  ) : activeTab === 'RECORDINGS' ? (
+                    <RecordingsPanel
+                      conversations={filteredConversations}
+                      activeConversationId={activeConversationId}
+                      activeConversation={activeConversation}
+                      recordingQuery={recordingQuery}
+                      recordingFrom={recordingFrom}
+                      recordingTo={recordingTo}
+                      renamingId={renamingId}
+                      renameDraft={renameDraft}
+                      isLoading={isLoading}
+                      isResuming={isResuming}
+                      onQueryChange={setRecordingQuery}
+                      onFromChange={setRecordingFrom}
+                      onToChange={setRecordingTo}
+                      onRenameDraftChange={setRenameDraft}
+                      onResume={(conversation) => void resumeConversation(conversation)}
+                      onTogglePin={(conversationId) =>
+                        setConversations((prev) => togglePinConversation(prev, conversationId))
+                      }
+                      onStartRename={(conversationId, title) => {
+                        setRenamingId(conversationId);
+                        setRenameDraft(title);
+                      }}
+                      onCommitRename={(conversationId) => {
+                        setConversations((prev) =>
+                          renameConversation(prev, conversationId, renameDraft),
+                        );
+                        setRenamingId(null);
+                      }}
+                      onCancelRename={() => setRenamingId(null)}
+                      onExport={exportConversation}
+                      onRemove={removeRecording}
+                    />
+                  ) : (
                     <>
                   <ChatDocsPanel
                     sources={sessionSources}
@@ -1269,6 +1047,8 @@ export default function ChatBot() {
                     onToggleChatWithDocs={handleToggleChatWithDocs}
                     onToggleSourcesOnly={setSourcesOnlyMode}
                     onToggleSource={handleToggleSource}
+                    onClearSession={clearSession}
+                    onNewSession={startNewThread}
                   />
                   {ingestError && chatWithDocs && (
                     <Box className="crt-doc-error crt-chat-docs-error">{ingestError}</Box>
@@ -1296,12 +1076,6 @@ export default function ChatBot() {
                             isLoading &&
                             message.role === 'assistant' &&
                             message.id === messages[messages.length - 1]?.id;
-                          const mermaidBlocks =
-                            message.role === 'assistant' ? extractMermaidBlocks(message.content) : [];
-                          const displayText =
-                            mermaidBlocks.length > 0
-                              ? stripMermaidFences(message.content)
-                              : message.content;
 
                           return (
                           <Box
@@ -1337,7 +1111,7 @@ export default function ChatBot() {
                                     <span className="crt-speaker">{speakerLabel(message.role)}</span>
                                     <span className="crt-msg-time">{formatMessageTimestamp(message.timestamp)}</span>
                                     <span className="crt-text">
-                                      {displayText}
+                                      {message.content}
                                       {isStreamingMessage &&
                                         (message.content.length > 0 ? (
                                           <span className="crt-stream-cursor" aria-hidden="true">
@@ -1352,13 +1126,6 @@ export default function ChatBot() {
                                         ))}
                                     </span>
                                   </p>
-                                  {mermaidBlocks.map((chart, index) => (
-                                    <MermaidDiagram
-                                      key={`${message.id}-mermaid-${index}`}
-                                      chart={chart}
-                                      diagramId={`${message.id}-${index}`}
-                                    />
-                                  ))}
                                   {message.sources && message.sources.length > 0 && (
                                     <Box className="crt-sources" component="ul">
                                       {message.sources.map((source) => (
@@ -1441,38 +1208,7 @@ export default function ChatBot() {
 
                   {showWelcome && (
                     <Box className="crt-prompts">
-                      <Box className="crt-prompts-header">
-                        <span>TEMPLATE TRANSMISSIONS</span>
-                        <button
-                          type="button"
-                          className="crt-recording-action-btn"
-                          onClick={() => {
-                            if (editingTemplates) {
-                              saveTransmissionTemplates(templateDrafts);
-                              setTransmissionTemplates(loadTransmissionTemplates());
-                              setEditingTemplates(false);
-                            } else {
-                              setTemplateDrafts([...transmissionTemplates]);
-                              setEditingTemplates(true);
-                            }
-                          }}
-                        >
-                          {editingTemplates ? 'SAVE LINES' : 'EDIT LINES'}
-                        </button>
-                      </Box>
-                      {(editingTemplates ? templateDrafts : transmissionTemplates).map((prompt, index) => (
-                        editingTemplates ? (
-                          <input
-                            key={`draft-${index}`}
-                            className="crt-template-input"
-                            value={prompt}
-                            onChange={(e) => {
-                              const next = [...templateDrafts];
-                              next[index] = e.target.value;
-                              setTemplateDrafts(next);
-                            }}
-                          />
-                        ) : (
+                      {STARTER_PROMPTS.map((prompt, index) => (
                         <button
                           key={prompt}
                           type="button"
@@ -1486,7 +1222,6 @@ export default function ChatBot() {
                           <span className="crt-prompt-num">L{index + 1}</span>
                           {prompt.toUpperCase()}
                         </button>
-                        )
                       ))}
                     </Box>
                   )}
@@ -1530,18 +1265,6 @@ export default function ChatBot() {
                       />
                     </Box>
                     <Box className="crt-input-side">
-                      <Tooltip title="Voice input">
-                        <button
-                          type="button"
-                          className={`crt-attach-btn${isListening ? ' crt-mic-btn--live' : ''}`}
-                          onClick={toggleVoice}
-                          disabled={isLoading}
-                          aria-label="Voice input"
-                        >
-                          <FaMicrophone />
-                          <span>MIC IN</span>
-                        </button>
-                      </Tooltip>
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -1553,16 +1276,6 @@ export default function ChatBot() {
                         tabIndex={-1}
                         aria-hidden="true"
                       />
-                      <Tooltip title="Attach files">
-                        <button
-                          type="button"
-                          className="crt-attach-btn"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isLoading}
-                        >
-                          <FaPaperclip /><span>ATTACH</span>
-                        </button>
-                      </Tooltip>
                       {isLoading ? (
                         <button type="button" className="crt-stop-btn" onClick={stopGeneration}>
                           <FaStop /><span>HALT</span>
@@ -1572,6 +1285,30 @@ export default function ChatBot() {
                           <span className="crt-send-btn-face">XMIT</span>
                         </button>
                       )}
+                      <Box className="crt-input-actions">
+                        <Tooltip title="Voice input (MIC IN)">
+                          <button
+                            type="button"
+                            className={`crt-attach-btn crt-attach-btn--icon${isListening ? ' crt-mic-btn--live' : ''}`}
+                            onClick={toggleVoice}
+                            disabled={isLoading}
+                            aria-label="Voice input"
+                          >
+                            <FaMicrophone />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Attach files">
+                          <button
+                            type="button"
+                            className="crt-attach-btn crt-attach-btn--icon"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading}
+                            aria-label="Attach files"
+                          >
+                            <FaPaperclip />
+                          </button>
+                        </Tooltip>
+                      </Box>
                     </Box>
                   </Box>
 
@@ -1588,11 +1325,6 @@ export default function ChatBot() {
                     </Box>
                   )}
                     </>
-                  ) : (
-                    <Box className="crt-panel crt-section-placeholder">
-                      <span className="crt-section-placeholder-label">{activeTab}</span>
-                      <p>THIS TERMINAL SECTION IS NOT WIRED YET. USE CHAT OR MAP.</p>
-                    </Box>
                   )}
                 </Box>
               </Box>
@@ -1600,7 +1332,9 @@ export default function ChatBot() {
               <Box className="crt-footer" component="footer">
                 <Box className="crt-footer-left">
                   <Box className="crt-signal-status" title={statusText}>
-                    <span className="crt-signal-label-text">{statusText}</span>
+                    <span className="crt-signal-label">
+                      <span className="crt-signal-label-text">{statusText}</span>
+                    </span>
                   </Box>
                 </Box>
                 <span className="crt-footer-owner">NEUROSENTIA SYSTEMS</span>
